@@ -9,6 +9,12 @@
 
 #define MAX_BUFFER_SIZE 4096
 
+#define MSS_PRINT_INFO(fmt, value) \
+        printf(fmt, value);
+
+#define MSS_PRINT_DEBUG(fmt, value, ...) \
+        fprintf(stderr, fmt, value, __VA_ARGS__);
+
 typedef enum
 {
     SIGNAL_COMMON_SENDER,
