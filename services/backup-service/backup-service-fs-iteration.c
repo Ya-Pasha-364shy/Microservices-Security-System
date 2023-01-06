@@ -16,7 +16,7 @@ static int ptree(char * const argv[])
 
     if (NULL == (ftsp = fts_open(argv, fts_options, NULL)))
     {
-        warn("Can't open %s", argv);
+        warn("Can't open file or directory for backup");
         return BACKUP_SERVICE_ERROR_CODE;
     }
 
@@ -50,10 +50,11 @@ static int ptree(char * const argv[])
     return BACKUP_SERVICE_NORMAL_CODE;
 }
 
-int backup_service_fs_iteration_main(char * const argv[])
+int backup_service_fs_iteration_main(char * const * argv)
 {
+    MSS_PRINT_DEBUG("%s: %s\n", __FUNCTION__, argv);
     int rc;
-    if (BACKUP_SERVICE_NORMAL_CODE != (rc = ptree(argv + 1)))
+    if (BACKUP_SERVICE_NORMAL_CODE != (rc = ptree(argv)))
     {
         rc = BACKUP_SERVICE_ERROR_CODE;
     }

@@ -8,6 +8,6 @@
 #include "backup-service-main.h"
 #include "../../helpers/helpers-common.h"
 
-int backup_service_fs_iteration_main(char * const argv[]);
+int backup_service_fs_iteration_main(char * const * argv);
 
 #endif // BACKUP_SERVICE_FS_ITERATION_H

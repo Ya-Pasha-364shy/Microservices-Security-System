@@ -76,11 +76,15 @@ int main(int argc, char * argv[])
         {
             backup_service_errno_handler("Can't read data from socket", &sockfd);
         }
+        MSS_PRINT_DEBUG("%s: ECHO REPLY = %s\n", __FUNCTION__, answer.message_data);
 
-        if (SIGNAL_MAKE_BACKUP == answer.signal &&
-            BACKUP_SERVICE_ERROR_CODE == backup_service_fs_iteration_main("/home/k1rch/CODE"))
+        if (SIGNAL_MAKE_BACKUP == answer.signal)
         {
-            backup_service_errno_handler("Error in make backup process", &sockfd);
+            char * const * backup_argv = (char * const * )"/home/k1rch/CODE";
+            if (BACKUP_SERVICE_ERROR_CODE == backup_service_fs_iteration_main(backup_argv))
+            {
+                backup_service_errno_handler("Error in make backup process", &sockfd);
+            }
         }
     }
     close(sockfd);
