@@ -1,7 +1,7 @@
 #ifndef SERVICE_MANAGER_MAIN_H
 #define SERVICE_MANAGER_MAIN_H
 
-#include "../helpers/helpers-message.h"
+#include "../helpers/helpers_common.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -15,16 +15,16 @@
 
 enum service_codes
 {
-    MGR_SERVICE_ERROR_CODE = -1,
-    MGR_SERVICE_NORMAL_CODE,
-    MGR_SERVICE_SOCKET_CREATION_EXIT,
-    MGR_SERVICE_UNEXPECTED_CODE,
+	MGR_SERVICE_ERROR_CODE = -1,
+	MGR_SERVICE_NORMAL_CODE,
+	MGR_SERVICE_SOCKET_CREATION_EXIT,
+	MGR_SERVICE_UNEXPECTED_CODE,
 };
 
 typedef struct {
-    int sockfd;
-    int newsockfd;
-    ipc_message_t message;
+	int sockfd;
+	int newsockfd;
+	service_message_t message;
 } mgr_service_process_args_t;
 
 static void service_child_process_handler(mgr_service_process_args_t* args);
