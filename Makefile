@@ -75,8 +75,8 @@ all_services: build_service_manager
 #############################################
 
 check:
-	ls -la $(BINARIES_SERVICES)/../ > test.txt
-	bash check_proccess.sh
+	ls -la $(BINARIES_SERVICES)/../ > ./test.txt
+	bash ./.github/check_proccess.sh
 
 clean:
 	rm -f $(BINARIES_SERVICES)/../service_manager $(BINARIES_SERVICES)/../backup_service

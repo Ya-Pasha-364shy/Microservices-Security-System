@@ -11,7 +11,7 @@ static unsigned long int watched_items;
 
 void signal_handler(int signum)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	logger("SIGINT signal handled, the program is terminated!");
 	backup_keep_running = 0;
 }
@@ -27,7 +27,7 @@ int helpers_get_backup_keep_running()
 // unused yet
 void helpers_mutex_trylock(pthread_mutex_t * mutex)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	unsigned int rc_mutex = 0, total_sleep = 0, sleep_now = 100;
 
 	while (backup_keep_running)
@@ -42,14 +42,14 @@ void helpers_mutex_trylock(pthread_mutex_t * mutex)
 			total_sleep += sleep_now;
 			if (0 == (total_sleep % HELPERS_10_SEC))
 			{
-				fprintf(stderr, "Error: mutex trylock is timeout !\n");
+				MSS_PRINT_DEBUG("Error: mutex trylock is timeout !");
 				return;
 			}
 			continue;
 		}
 		else
 		{
-			fprintf(stderr, "Error: mutex trylock is fail !\n");
+			MSS_PRINT_DEBUG("Error: mutex trylock is fail !");
 			return;
 		}
 	}
@@ -60,12 +60,12 @@ void helpers_mutex_trylock(pthread_mutex_t * mutex)
 
 int close_inotify_fd(int fd)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	int r;
 
 	if ((r = close(fd)) < 0)
 	{
-		fprintf(stderr, "impossible to close inotify fd\n");
+		MSS_PRINT_DEBUG("impossible to close inotify fd");
 		return HELPERS_INVALID_EXIT;
 	}
 
@@ -75,7 +75,7 @@ int close_inotify_fd(int fd)
 
 int open_inotify_fd(void)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	static int fd;
 	if (fd)
 	{
@@ -85,7 +85,7 @@ int open_inotify_fd(void)
 
 	if (fd <= HELPERS_NORMAL_EXIT)
 	{
-		fprintf(stderr, "inotify_init failed !\n");
+		MSS_PRINT_DEBUG("inotify_init failed !");
 		return HELPERS_INVALID_EXIT;
 	}
 
@@ -94,12 +94,8 @@ int open_inotify_fd(void)
 
 int watch_dir(int fd, const char * dirname, unsigned long mask)
 {
-	fprintf(stderr, "<%s>\n", __func__);
-	if (NULL == dirname)
-	{
-		fprintf(stderr, "<%s> path to interested directory is NULL !\n", __func__);
-		return HELPERS_INVALID_EXIT;
-	}
+	MSS_PRINT_DEBUG("<%s>", __func__);
+	PTR_IS_NULL(dirname, HELPERS_INVALID_EXIT);
 
 	int wd;
 	char message_buffer[HELPERS_AVER_BUFFER_SIZE] = {0};
@@ -117,14 +113,14 @@ int watch_dir(int fd, const char * dirname, unsigned long mask)
 	}
 	if (LOGGER_NORMAL_EXIT == logger(message_buffer))
 	{
-		fprintf(stderr, "start-log-messages was be writed into log-file; thr_id = %lu !\n", pthread_self());
+		MSS_PRINT_DEBUG("start-log-messages was be writed into log-file; thr_id = %lu !", pthread_self());
 	}
 	return wd;
 }
 
 static int event_check(int fd)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	int ret = 0;
 	struct pollfd fds;
 	fds.fd = fd; fds.events = POLLIN;
@@ -159,7 +155,7 @@ static int event_check(int fd)
 
 static int read_events(queue_t q, int fd)
 {
-	fprintf(stderr, "<%s>", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	int count = 0;
 	size_t event_size, q_event_size;
 	ssize_t r, buffer_i;
@@ -193,7 +189,7 @@ static int read_events(queue_t q, int fd)
 
 void process_handle_events(queue_t q, thread_argument_t * arg)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	queue_entry_t event;
 	while (!queue_empty(q))
 	{
@@ -206,7 +202,7 @@ void process_handle_events(queue_t q, thread_argument_t * arg)
 
 int process_inotify_events(queue_t q, int fd, thread_argument_t * arg)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	int rc = HELPERS_NORMAL_EXIT;
 	while (backup_keep_running && watched_items > 0)
 	{
@@ -228,7 +224,7 @@ int process_inotify_events(queue_t q, int fd, thread_argument_t * arg)
 
 void * pthread_on_dir_run(void * argument)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	int wd;
 	int inotify_fd = open_inotify_fd();
 	unsigned long condition = IN_ALL_EVENTS & ~(IN_CLOSE | IN_OPEN | IN_ACCESS);
@@ -263,7 +259,7 @@ out:
 
 static bool backup_helpers_find_file(const char * pattern, DIR * dr)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	if (!backup_keep_running) return false;
 
 	struct dirent * de;
@@ -282,7 +278,7 @@ static bool backup_helpers_find_file(const char * pattern, DIR * dr)
 
 static void handle_event(queue_entry_t event, thread_argument_t * arg)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	bool need_to_backup = false;
 	bool is_dir = event->inot_ev.mask & IN_ISDIR;
 	/* If the event was associated with a filename, we will store it here */
@@ -376,8 +372,8 @@ static void handle_event(queue_entry_t event, thread_argument_t * arg)
 		case IN_IGNORED:
 		{
 			watched_items--;
-			fprintf(stderr, "IGNORED: WD #%d\n", cur_event_wd);
-			fprintf(stderr, "Watching = %ld items\n", watched_items);
+			MSS_PRINT_DEBUG("IGNORED: WD #%d", cur_event_wd);
+			MSS_PRINT_DEBUG("Watching = %ld items", watched_items);
 			if (watched_items <= 0)
 			{
 				return;
@@ -400,7 +396,7 @@ static void handle_event(queue_entry_t event, thread_argument_t * arg)
 	}
 	if (HELPERS_NORMAL_EXIT == logger(message_buffer))
 	{
-		fprintf(stderr, "Log-message was be writed in %s successfully !\n", logger_get_path_to_log());
+		MSS_PRINT_DEBUG("Log-message was be writed in %s successfully !", logger_get_path_to_log());
 	}
 
 	if (need_to_backup && !is_dir)
@@ -422,7 +418,7 @@ static void handle_event(queue_entry_t event, thread_argument_t * arg)
 	if (flags & (~IN_ISDIR))
 	{
 		flags = event->inot_ev.mask;
-		fprintf(stderr, "Flags = %lX\n", flags);
+		MSS_PRINT_DEBUG("Flags = %lX", flags);
 	}
 	return;
 }
@@ -434,13 +430,13 @@ static char path_to_backup[HELPERS_AVER_BUFFER_SIZE];
 
 char * backup_get_path_to_backup()
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	return path_to_backup;
 }
 
 void backup_set_path_to_backup(char * set)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	if (NULL == set) return;
 	strinit(path_to_backup);
 	strncpy(path_to_backup, set, strlen(set));
@@ -448,7 +444,7 @@ void backup_set_path_to_backup(char * set)
 
 static void backup_fs_make_backup(char * path_to_file, char * filename)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	char command[HELPERS_BUF_SIZE+HELPERS_AVER_BUFFER_SIZE+1] = {0};
 
 	if (SLASH_FOUNDED == strlen(strrchr(path_to_backup, HELPERS_SLASH)))
@@ -462,14 +458,14 @@ static void backup_fs_make_backup(char * path_to_file, char * filename)
 
 	if (HELPERS_INVALID_EXIT == system(command))
 	{
-		fprintf(stderr, "Cannot execute the command!\n");
+		MSS_PRINT_DEBUG("Cannot execute the command!");
 	}
 	return;
 }
 
 static int backup_check_fs_and_run(thread_argument_t * arg)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	const int sleep_now = 1;
 	int fts_options     = FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR;
 	FTS    * ftsp       = NULL;
@@ -486,7 +482,7 @@ static int backup_check_fs_and_run(thread_argument_t * arg)
 
 	if (NULL == (ftsp = fts_open(paths, fts_options, NULL)))
 	{
-		printf("Can't open file for backup !");
+		MSS_PRINT_INFO("Can't open file for backup !");
 		return free_and_exit(HELPERS_INVALID_EXIT);
 	}
 
@@ -501,7 +497,7 @@ static int backup_check_fs_and_run(thread_argument_t * arg)
 		{
 			case FTS_F:
 			{
-                // TODO:
+				// TODO:
 				// checking that file was be "backuped"
 				// file in all subdirectories of our "root" (in arg->path_to_dir)
 				hash_table_insert_item(arg->hash_table, p->fts_path);
@@ -528,7 +524,7 @@ static int backup_check_fs_and_run(thread_argument_t * arg)
 			wd = watch_dir(inotify_fd, ht_dirs->table[i]->value, IN_ALL_EVENTS & ~(IN_CLOSE | IN_OPEN | IN_ACCESS));
 			if (HELPERS_INVALID_EXIT == wd)
 			{
-				free_and_exit(HELPERS_INVALID_EXIT);	
+				free_and_exit(HELPERS_INVALID_EXIT);
 			}
 			hash_table_insert_item(arg->hash_table, ht_dirs->table[i]->value);
 		}
@@ -538,12 +534,12 @@ static int backup_check_fs_and_run(thread_argument_t * arg)
 
 int backup_fs_iteration_main(thread_argument_t * arg)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 
 	int rc = backup_check_fs_and_run(arg);
 	if (0 == arg->hash_table->count)
 	{
-		fprintf(stderr, "Warning: hash table is void !\n");
+		MSS_PRINT_DEBUG("Warning: hash table is void !");
 		rc = HELPERS_INVALID_EXIT;
 	}
 
@@ -554,9 +550,8 @@ int backup_fs_iteration_main(thread_argument_t * arg)
 /* HELPERS PARSING CONFIG */
 int parser_get_index_by_param(char * stroke, char param)
 {
-	fprintf(stderr, "<%s>\n", __func__);
-	if (NULL == stroke)
-		return -1;
+	MSS_PRINT_DEBUG("<%s>", __func__);
+	PTR_IS_NULL(stroke, HELPERS_INVALID_EXIT);
 
 	if (strlen(stroke) > HELPERS_FILE_STROKE_MAX_LEN)
 		return -2;
@@ -567,13 +562,10 @@ int parser_get_index_by_param(char * stroke, char param)
 
 char * parser_read_conf()
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	char cwd[HELPERS_AVER_BUFFER_SIZE] = {0};
-	if (NULL == getcwd(cwd, sizeof(cwd)))
-	{
-		fprintf(stderr, "Error: function getcwd()\n");
-		return NULL;
-	}
+	PTR_IS_NULL(getcwd(cwd, sizeof(cwd)), NULL);
+
 	char * pathToConf = (char *)calloc(strlen(cwd) + strlen(PATH_TO_CONFIG) + 1, sizeof(char));
 
 	strcat(pathToConf, cwd);
@@ -581,7 +573,7 @@ char * parser_read_conf()
 	FILE * cp = fopen(pathToConf, "r");
 	if (NULL == cp)
 	{
-		fprintf(stderr, "Error for opening file!\n");
+		MSS_PRINT_DEBUG("Error for opening file!");
 		free(pathToConf);
 		return NULL;
 	}

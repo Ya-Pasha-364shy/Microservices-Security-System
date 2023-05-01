@@ -28,6 +28,6 @@ typedef struct {
 } mgr_service_process_args_t;
 
 static void service_child_process_handler(mgr_service_process_args_t* args);
-static void service_errno_handler(const char * message, void * data, void * service_process_args);
+static void service_err_handler(const char * message, void * data, void * service_process_args);
 
 #endif // SERVICE_MANAGER_MAIN_H
