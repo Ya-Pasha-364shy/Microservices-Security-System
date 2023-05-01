@@ -10,7 +10,7 @@
 #include "../../include/services/backup_service/helpers_backup_common.h"
 #include "../../include/helpers/helpers_common.h"
 
-void backup_service_errno_handler(const char * message, void * data)
+void backup_service_err_handler(const char * message, void * data)
 {
 	perror(message);
 	if (data && (sizeof(data) == sizeof(int *)))
@@ -28,8 +28,8 @@ void backup_service_errno_handler(const char * message, void * data)
 */
 void * backup_loop(void * argument)
 {
-	fprintf(stderr, "<%s> thread id %lu start running on backup loop successfully...\n",
-	       __func__, pthread_self());
+	MSS_PRINT_DEBUG("<%s> thread id %lu start running on backup loop successfully...",
+	                __func__, pthread_self());
 
 	backup_fs_iteration_main((thread_argument_t *)argument);
 	
@@ -38,7 +38,7 @@ void * backup_loop(void * argument)
 
 void * general_loop(void * argument)
 {
-	fprintf(stderr, "<%s>\n", __func__);
+	MSS_PRINT_DEBUG("<%s>", __func__);
 	return pthread_on_dir_run(argument);
 }
 
@@ -56,11 +56,7 @@ static int backup_parse_and_serialize_config(thread_argument_t * arg,
 
 	buffer = parser_read_conf();
 
-	if (NULL == buffer)
-	{
-		fprintf(stderr, "Error: invalid buffer value");
-		return INVALID_EXIT;
-	}
+	PTR_IS_NULL(buffer, INVALID_EXIT);
 	while (flag)
 	{
 		for (i = before; buffer[i] != '\n'; i++)
@@ -119,7 +115,7 @@ static int backup_parse_and_serialize_config(thread_argument_t * arg,
 			stat(slice_after_delimeter, &path_stat);
 			if (!S_ISDIR(path_stat.st_mode))
 			{
-				fprintf(stderr, "Warning: this path is not a path to directory !\n");
+				MSS_PRINT_DEBUG("Warning: this path is not a path to directory !");
 				free(buffer);
 				return INVALID_EXIT;
 			}
@@ -168,7 +164,7 @@ int start(int argc, char * argv[])
 #endif
 	)
 	{
-		printf("Failed to redirect I/Os to /dev/null, exiting.\n");
+		MSS_PRINT_INFO("Failed to redirect I/Os to /dev/null, exiting.");
 		return free_and_exit(INVALID_EXIT);
 	}
 
@@ -187,7 +183,7 @@ int start(int argc, char * argv[])
 	pthread_mutex_t mutex;
 	if (0 != pthread_mutex_init(&mutex, NULL))
 	{
-		printf("Error: pthread_mutex_init() failed !\n");
+		MSS_PRINT_INFO("Error: pthread_mutex_init() failed !");
 		return free_and_exit(INVALID_EXIT);
 	}
 	argument->mutex = &mutex;
@@ -198,7 +194,7 @@ int start(int argc, char * argv[])
 		rc = pthread_create(&threads[i], NULL, func[i], argument);
 		if (NORMAL_EXIT != rc)
 		{
-			printf("<%s> Error for create thread id #%lu; return code: %d", __func__, threads[i], rc);
+			MSS_PRINT_INFO("<%s> Error for create thread id #%lu; return code: %d", __func__, threads[i], rc);
 			pthread_mutex_destroy(&mutex);
 			return free_and_exit(INVALID_EXIT);
 		}
@@ -216,7 +212,7 @@ int start(int argc, char * argv[])
 
 			if (!(total_sleep % MAX_SEC_WAIT))
 			{
-				printf("\n!!! timeout for waiting %lu thread, exiting !!!\n", threads[i]);
+				MSS_PRINT_INFO("\n!!! timeout for waiting %lu thread, exiting !!!", threads[i]);
 				rc = INVALID_EXIT;
 				break;
 			}
@@ -224,7 +220,7 @@ int start(int argc, char * argv[])
 		}
 		if (rc != 0)
 		{
-			printf("Error for join thread id #%lu; return code: %d\n", threads[i], rc);
+			MSS_PRINT_INFO("Error for join thread id #%lu; return code: %d", threads[i], rc);
 		}
 	}
 
@@ -239,12 +235,12 @@ int main(int argc, char * argv[])
 
 	if (argc != BACKUP_SERVICE_UNEXPECTED_CODE)
 	{
-		backup_service_errno_handler("Usage: ./backup_service <IP address>", NULL);
+		backup_service_err_handler("Usage: ./backup_service <IP address>", NULL);
 	}
 
 	if (BACKUP_SERVICE_ERROR_CODE == (sockfd = socket(PF_INET, SOCK_STREAM, 0)))
 	{
-		backup_service_errno_handler("Can't create a socket with TCP type", NULL);
+		backup_service_err_handler("Can't create a socket with TCP type", NULL);
 	}
 
 	bzero(&servaddr, sizeof(servaddr));
@@ -254,12 +250,12 @@ int main(int argc, char * argv[])
 	// default is 0.0.0.0:7777
 	if (inet_aton(argv[1], &servaddr.sin_addr) == 0)
 	{
-		backup_service_errno_handler("Invalid IP address", &sockfd);
+		backup_service_err_handler("Invalid IP address", &sockfd);
 	}
 
 	if (BACKUP_SERVICE_ERROR_CODE == connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)))
 	{
-		backup_service_errno_handler("Impossible to connect with open socket", &sockfd);
+		backup_service_err_handler("Impossible to connect with open socket", &sockfd);
 	}
 
 	service_message_t say_hello_backup_service = {0}, answer = {0};
@@ -269,17 +265,17 @@ int main(int argc, char * argv[])
 	// Бэкап-сервис спрашивает разрешения от service-manager и начинает процесс запуска бэкапа.
 	if ((n = write(sockfd, &say_hello_backup_service, sizeof(say_hello_backup_service))) < 0)
 	{
-		backup_service_errno_handler("Can't send data by socket", &sockfd);
+		backup_service_err_handler("Can't send data by socket", &sockfd);
 	}
 	if ((n = read(sockfd, &answer, sizeof(answer))) < 0)
 	{
-		backup_service_errno_handler("Can't read data from socket", &sockfd);
+		backup_service_err_handler("Can't read data from socket", &sockfd);
 	}
 	if (SIGNAL_MAKE_BACKUP_ACCEPT == answer.signal)
 	{
 		if (NORMAL_EXIT != start(argc, argv))
 		{
-			backup_service_errno_handler("Error in the backup-processing", &sockfd);
+			backup_service_err_handler("Error in the backup-processing", &sockfd);
 		}
 	}
 	close(sockfd);

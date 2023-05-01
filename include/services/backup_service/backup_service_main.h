@@ -37,7 +37,7 @@ typedef struct {
 	char * line;
 } backup_service_process_args_t;
 
-void backup_service_errno_handler(const char * message, void * data);
+void backup_service_err_handler(const char * message, void * data);
 
 void * backup_loop(void * argument);
 void * main_loop(void * argument);

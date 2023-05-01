@@ -10,6 +10,7 @@ static char path_to_log[LOGGER_PATH_TO_LOG_LEN] = {0};
 void logger_set_path_to_log(char * set)
 {
 	if (NULL == set) return;
+
 	strinit(path_to_log);
 	strncpy(path_to_log, set, strlen(set));
 }
@@ -21,12 +22,12 @@ char * logger_get_path_to_log()
 
 int logger(char * message)
 {
-	if (!message) return LOGGER_INVALID_EXIT;
-	FILE * fptr;
+	PTR_IS_NULL(message, LOGGER_INVALID_EXIT);
 
+	FILE * fptr;
 	if ((fptr = fopen(path_to_log, "a")) == NULL)
 	{
-		fprintf(stderr, "Error: unable to open log file!\n");
+		MSS_PRINT_DEBUG("Error: unable to open log file!");
 		return LOGGER_INVALID_EXIT;
 	}
 	fprintf(fptr, "%s\n", message);

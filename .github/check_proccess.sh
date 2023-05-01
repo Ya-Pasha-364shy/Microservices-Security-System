@@ -8,7 +8,7 @@ while IFS= read -r line; do
 		counter=$(($counter + 1));
 	fi
 done<./test.txt
-rm test.txt
+rm -f test.txt
 
 if [ "$counter" -eq 2 ]; then
 	echo "OK"

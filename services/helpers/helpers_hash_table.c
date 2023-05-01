@@ -3,6 +3,7 @@
 #include <string.h>
 #include <malloc.h>
 #include "../../include/helpers/helpers_hash_table.h"
+#include "../../include/helpers/helpers_common.h"
 
 /*
  * @brief
@@ -26,7 +27,7 @@ static hash_item_t * __hash_item_create(char * value)
 	size_t value_len = strlen(value);
 	if (value_len > HASH_ITEM_MAX_SIZE_STR)
 	{
-		printf("Warning: length of given value is too big !");
+		MSS_PRINT_INFO("Warning: length of given value is too big !");
 		return NULL;
 	}
 
@@ -40,7 +41,7 @@ static hash_item_t * __hash_item_create(char * value)
 	hash_t key       = __hash_key_generator(value);
 	if (key >= 0 && key <= 1.1)
 	{
-		printf("Error: This key's value is too big !\n");
+		MSS_PRINT_INFO("Error: This key's value is too big !");
 		return NULL;
 	}
 	else
@@ -102,7 +103,7 @@ unsigned int hash_table_insert_item(hash_table_t * this, char * value)
 	if (!this || !value) return 2;
 	if (this->count == this->size)
 	{
-		printf("!!! Warning: Hash table is full !!!\n");
+		MSS_PRINT_INFO("!!! Warning: Hash table is full !!!");
 		return 1;
 	}
 
@@ -113,7 +114,7 @@ unsigned int hash_table_insert_item(hash_table_t * this, char * value)
 	hash_item_t * item       = __hash_item_create(value);
 	if (!item)
 	{
-		printf("!!! Warining: item is null !!!\n");
+		MSS_PRINT_INFO("!!! Warining: item is null !!!");
 		return 1;
 	}
 	hash_item_t ** head      = &this->table[key];
@@ -128,11 +129,11 @@ unsigned int hash_table_insert_item(hash_table_t * this, char * value)
 		char ** head_value = &(*head)->value;
 		if (!strncmp(*head_value, item->value, strlen(*head_value)))
 		{
-			printf("Note: Full repetition of elements detected !\n");
+			MSS_PRINT_INFO("Note: Full repetition of elements detected !");
 		}
 		else
 		{
-			printf("!!! Error: collision occurred. This item would be skipped !!!\n");
+			MSS_PRINT_INFO("!!! Error: collision occurred. This item would be skipped !!!");
 			return 2;
 		}
 	}
@@ -172,7 +173,7 @@ int test1()
 	hash_table_insert_item(HT, "babi");
 
 	hash_item_t * HI = hash_table_search_item(HT, 0, "/home/k1rch/value3");
-	printf("[1] = %d:%s\n", HI->key, HI->value);
+	MSS_PRINT_INFO("[1] = %d:%s", HI->key, HI->value);
 	hash_table_free(HT);
 }
 #endif
