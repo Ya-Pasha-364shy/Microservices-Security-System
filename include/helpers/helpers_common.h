@@ -9,11 +9,18 @@
 
 #define MSS_BUFFER_SIZE 512
 
-#define MSS_PRINT_INFO(fmt, value) \
-        printf(fmt, value);
+#define MSS_PRINT_DEBUG(fmt, ...) \
+	fprintf(stderr, fmt, ##__VA_ARGS__); fprintf(stderr, "\n");
 
-#define MSS_PRINT_DEBUG(fmt, value, ...) \
-        fprintf(stderr, fmt, value, __VA_ARGS__);
+#define MSS_PRINT_INFO(fmt, ...) \
+	fprintf(stdout, fmt, ##__VA_ARGS__); fprintf(stdout, "\n");
+
+#define PTR_IS_NULL(pointer, ret_code) \
+	if (pointer == NULL) \
+	{ \
+		MSS_PRINT_DEBUG("<%s:%d> %s is NULL !", __func__, __LINE__, #pointer); \
+		return ret_code; \
+	}
 
 typedef enum
 {
