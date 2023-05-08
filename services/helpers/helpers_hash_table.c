@@ -38,7 +38,7 @@ static hash_item_t * __hash_item_create(char * value)
 	memset(hash_item->value, 0, sizeof(char) * value_len);
 	strncpy(hash_item->value, value, value_len);
 
-	hash_t key       = __hash_key_generator(value);
+	hash_t key = __hash_key_generator(value);
 	if (key >= 0 && key <= 1.1)
 	{
 		MSS_PRINT_INFO("Error: This key's value is too big !");
@@ -47,6 +47,9 @@ static hash_item_t * __hash_item_create(char * value)
 	else
 	{
 		hash_item->key = key;
+		hash_item->next = NULL;
+		hash_item->previous = NULL;
+
 		return hash_item;
 	}
 }
@@ -56,13 +59,14 @@ hash_table_t * hash_table_create(hash_table_size_t size)
 	if (size <= 0 || size > HASH_TABLE_MAX) return NULL;
 
 	hash_table_t * this = (hash_table_t *)malloc(sizeof(hash_table_t));
-	this->size          = size;
+	this->size = size;
 
 	this->table = (hash_item_t **)calloc(this->size, sizeof(hash_item_t *));
 	for (int i = 0; i < size; i++)
 	{
 		this->table[i] = NULL;
 	}
+	this->node = NULL;
 
 	return this;
 }
@@ -119,9 +123,19 @@ unsigned int hash_table_insert_item(hash_table_t * this, char * value)
 	}
 	hash_item_t ** head      = &this->table[key];
 
-	if (!(*head))
+	if (head && !(*head))
 	{
 		*head = item;
+		if (NULL == this->node)
+		{
+			this->node = *head;
+		}
+		else
+		{
+			this->node->next = item;
+			item->previous = this->node;
+			this->node = item;
+		}
 		++this->count;
 	}
 	else if ((*head)->key == key)
