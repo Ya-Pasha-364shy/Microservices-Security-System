@@ -1,7 +1,7 @@
 #include "../../include/services/backup_service/helpers_backup_common.h"
 #include "../../include/helpers/helpers_common.h"
 #include <sys/poll.h>
-#define PATH_TO_CONFIG "/services/backup_service/config.conf"
+
 #define COPY_COMMAND   "/bin/cp"
 #define IS_OPEN        1
 #define SLASH_FOUNDED  1
@@ -561,16 +561,17 @@ int parser_get_index_by_param(char * stroke, char param)
 	return res;
 }
 
-char * parser_read_conf()
+char * parser_read_conf(const char * path_to_config)
 {
 	MSS_PRINT_DEBUG("<%s>", __func__);
 	char cwd[HELPERS_AVER_BUFFER_SIZE] = {0};
 	PTR_IS_NULL(getcwd(cwd, sizeof(cwd)), NULL);
 
-	char * pathToConf = (char *)calloc(strlen(cwd) + strlen(PATH_TO_CONFIG) + 1, sizeof(char));
+	char * pathToConf = (char *)calloc(strlen(cwd) + strlen(path_to_config) + 1, sizeof(char));
 
 	strcat(pathToConf, cwd);
-	strcat(pathToConf, PATH_TO_CONFIG);
+	strcat(pathToConf, path_to_config);
+
 	FILE * cp = fopen(pathToConf, "r");
 	if (NULL == cp)
 	{

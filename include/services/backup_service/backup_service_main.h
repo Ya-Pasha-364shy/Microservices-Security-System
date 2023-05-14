@@ -23,6 +23,8 @@
 
 #define MAX_SEC_WAIT     (30)
 
+#define BACKUP_PATH_TO_CONFIG       ("/services/backup_service/config.conf")
+
 enum backup_service_codes
 {
 	BACKUP_SERVICE_ERROR_CODE = -1,

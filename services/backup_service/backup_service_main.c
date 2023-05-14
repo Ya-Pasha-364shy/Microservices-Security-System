@@ -54,7 +54,7 @@ static int backup_parse_and_serialize_config(thread_argument_t * arg,
 	char * buffer, tmp, dir;
 	char before_value[HELPERS_BUF_SIZE] = {0};
 
-	buffer = parser_read_conf();
+	buffer = parser_read_conf(BACKUP_PATH_TO_CONFIG);
 
 	PTR_IS_NULL(buffer, INVALID_EXIT);
 	while (flag)
