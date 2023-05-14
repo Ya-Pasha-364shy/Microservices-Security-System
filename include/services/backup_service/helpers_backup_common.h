@@ -105,11 +105,11 @@ void backup_set_path_to_backup(char * set);
 int backup_fs_iteration_main(thread_argument_t * arg);
 
 /* ======================= */
-/*     CONFIG PARSER      */
+/*   PARSER OF CONFIG      */
 
 #define PARSER_DELIMETER ':'
 
 int parser_get_index_by_param(char * stroke, char param);
-char * parser_read_conf();
+char * parser_read_conf(const char * path_to_config);
 
 #endif // HELPERS_BACKUP_COMMON_H
