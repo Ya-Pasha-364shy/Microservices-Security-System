@@ -2,8 +2,6 @@
  * \author Pavel Chernov (K1rch)
  * \brief  Server side for multiprocessing communication
  *         named by service-manager
- *
- * \date   03.01.2023
 */
 #include "../include/services/service_manager_main.h"
 
@@ -57,6 +55,17 @@ static void service_child_process_handler(mgr_service_process_args_t * args)
 					    sizeof(args->message))))
 					{
 						args->message.signal = SIGNAL_MAKE_BACKUP_DENY;
+						service_err_handler("Can't write an answer to client by newsocket", NULL, args);
+					}
+				}
+				else if (firewall_service_process_type == args->message.process_id &&
+				         SIGNAL_FIREWALL_INIT == args->message.signal)
+				{
+					args->message.signal = SIGNAL_MAKE_FIREWALL_ACCEPT;
+					if (MGR_SERVICE_ERROR_CODE == (n = write(args->newsockfd, &args->message,
+					    sizeof(args->message))))
+					{
+						args->message.signal = SIGNAL_MAKE_FIREWALL_DENY;
 						service_err_handler("Can't write an answer to client by newsocket", NULL, args);
 					}
 				}
