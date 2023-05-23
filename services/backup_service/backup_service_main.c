@@ -3,12 +3,11 @@
  * \brief  Service (process) for backup some directory
  *         which is specified in the configuration file
  *         named by backup-service
- *
- * \date   03.01.2023
 */
 #include "../../include/services/backup_service/backup_service_main.h"
 #include "../../include/services/backup_service/helpers_backup_common.h"
 #include "../../include/helpers/helpers_common.h"
+#include "../../include/helpers/helpers_parser.h"
 
 void backup_service_err_handler(const char * message, void * data)
 {
@@ -88,7 +87,8 @@ static int backup_parse_and_serialize_config(thread_argument_t * arg,
 		int index = parser_get_index_by_param(tmp, PARSER_DELIMETER);
 		if (0 > index)
 		{
-			continue;
+			// TODO: add check, that one of config required attrs is null
+			break;
 		}
 
 		int k;
@@ -121,15 +121,20 @@ static int backup_parse_and_serialize_config(thread_argument_t * arg,
 			}
 			strncpy(path_to_dir_buffer, slice_after_delimeter, strlen(slice_after_delimeter));
 		}
-		if (0 == strcmp(before_value, PATH_TO_BACKUP_DEFINE))
+		else if (0 == strcmp(before_value, PATH_TO_BACKUP_DEFINE))
 		{
 			backup_set_path_to_backup(slice_after_delimeter);
 		}
-		if (0 == strcmp(before_value, PATH_TO_LOGGER_DEFINE))
+		else if (0 == strcmp(before_value, PATH_TO_LOGGER_DEFINE))
 		{
 			logger_set_path_to_log(slice_after_delimeter);
 		}
+		else
+		{
+			break;
+		}
 	}
+	MSS_PRINT_INFO("The configuration of \"backup\" was successfully applied !");
 	free(buffer);
 	arg->path_to_dir = path_to_dir_buffer;
 
@@ -138,7 +143,7 @@ static int backup_parse_and_serialize_config(thread_argument_t * arg,
 
 /*
  * @brief
- * main driver
+ * main driver for "Backupd" service
  * needed to distribute the work with POSIX threads
 */
 int start(int argc, char * argv[])
@@ -168,7 +173,7 @@ int start(int argc, char * argv[])
 		return free_and_exit(INVALID_EXIT);
 	}
 
-	if (signal(SIGINT, signal_handler) == SIG_IGN)
+	if (signal(SIGINT, backup_signal_handler) == SIG_IGN)
 	{
 		/* Ignore the signal SIGINT (Ctrl+C) */
 		signal(SIGINT, SIG_IGN);
@@ -210,7 +215,7 @@ int start(int argc, char * argv[])
 			total_sleep += sleep_now;
 			sleep(sleep_now);
 
-			if (!(total_sleep % MAX_SEC_WAIT))
+			if (!(total_sleep % BACKUP_MAX_SEC_WAIT))
 			{
 				MSS_PRINT_INFO("\n!!! timeout for waiting %lu thread, exiting !!!", threads[i]);
 				rc = INVALID_EXIT;
@@ -235,7 +240,7 @@ int main(int argc, char * argv[])
 
 	if (argc != BACKUP_SERVICE_UNEXPECTED_CODE)
 	{
-		backup_service_err_handler("Usage: ./backup_service <IP address>", NULL);
+		backup_service_err_handler("Usage: sudo ./firewall_service <IP address>", NULL);
 	}
 
 	if (BACKUP_SERVICE_ERROR_CODE == (sockfd = socket(PF_INET, SOCK_STREAM, 0)))

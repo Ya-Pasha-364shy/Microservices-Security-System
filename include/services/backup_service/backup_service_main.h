@@ -11,8 +11,6 @@
 #include <string.h>
 #include "helpers_backup_common.h"
 
-#define ENABLE_DEBUG_INFO
-
 #define SLEEP_ONE_SEC    (1)
 
 #define NORMAL_EXIT      (0)
@@ -21,7 +19,7 @@
 #define THREAD_COUNT     (2)
 #define MAIN_BUFFER_SIZE (128)
 
-#define MAX_SEC_WAIT     (30)
+#define BACKUP_MAX_SEC_WAIT (30)
 
 #define BACKUP_PATH_TO_CONFIG       ("/services/backup_service/config.conf")
 

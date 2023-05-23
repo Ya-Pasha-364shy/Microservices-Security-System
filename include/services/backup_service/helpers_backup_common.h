@@ -61,7 +61,7 @@ typedef struct thread_argument_s
 } thread_argument_t;
 
 // for ignore and handle SIGINT signal
-void signal_handler(int signum);
+void backup_signal_handler(int signum);
 
 int helpers_get_backup_keep_running(void);
 
@@ -103,13 +103,5 @@ int process_inotify_events(queue_t q, int fd, thread_argument_t * arg);
 char * backup_get_path_to_backup();
 void backup_set_path_to_backup(char * set);
 int backup_fs_iteration_main(thread_argument_t * arg);
-
-/* ======================= */
-/*   PARSER OF CONFIG      */
-
-#define PARSER_DELIMETER ':'
-
-int parser_get_index_by_param(char * stroke, char param);
-char * parser_read_conf(const char * path_to_config);
 
 #endif // HELPERS_BACKUP_COMMON_H

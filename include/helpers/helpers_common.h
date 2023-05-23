@@ -6,8 +6,11 @@
 #include <stdbool.h>
 #include <malloc.h>
 #include <string.h>
+#include <stdint.h>
 
 #define MSS_BUFFER_SIZE 512
+
+#define ENABLE_DEBUG_INFO
 
 #define MSS_PRINT_DEBUG(fmt, ...) \
 	fprintf(stderr, fmt, ##__VA_ARGS__); fprintf(stderr, "\n");
@@ -31,15 +34,21 @@ typedef enum
 
 typedef enum
 {
-	parser_service_process_type,
+	SIGNAL_FIREWALL_INIT,
+	SIGNAL_MAKE_FIREWALL_DENY,
+	SIGNAL_MAKE_FIREWALL_ACCEPT,
+} mss_firewall_service_signal_t;
+
+typedef enum
+{
 	backup_service_process_type,
-	time_service_process_type,
+	firewall_service_process_type,
 } ipc_message_process_id;
 
 typedef struct ipc_message_
 {
 	ipc_message_process_id  process_id;
-	mss_backup_service_signal_t signal;
+	uint8_t signal;
 
 	// for description of errors
 	char message_data[MSS_BUFFER_SIZE];

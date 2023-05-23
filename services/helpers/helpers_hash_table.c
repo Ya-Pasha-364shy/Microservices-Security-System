@@ -39,7 +39,7 @@ static hash_item_t * __hash_item_create(char * value)
 	strncpy(hash_item->value, value, value_len);
 
 	hash_t key = __hash_key_generator(value);
-	if (key >= 0 && key <= 1.1)
+	if (key <= 1.1)
 	{
 		MSS_PRINT_INFO("Error: This key's value is too big !");
 		return NULL;
