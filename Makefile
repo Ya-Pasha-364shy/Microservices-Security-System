@@ -48,6 +48,8 @@ build_firewall_service_helpers:
 	-o $(BINARIES_HELPERS)/helpers_firewall_common.o
 
 build_firewall_service: build_firewall_service_helpers
+    sudo apt-get install libpcap0.8-dev
+
 	$(CC) $(FIREWALL_FLAGS) -D_GNU_SOURCE $(WORKDIR_SERVICES)/firewall_service/firewall_service_main.c \
 	-o $(BINARIES_SERVICES)/firewall_service/firewall_service_main.o
 
