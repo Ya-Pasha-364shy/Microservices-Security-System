@@ -216,15 +216,6 @@ int fw_ip_tables_save()
 	return system("sudo iptables-save") < 0;
 }
 
-int fw_ip_tables_flush()
-{
-	char buffer[FW_BUF_SIZE] = {0};
-	sprintf(buffer, "sudo iptables --flush %s && sudo iptables --flush %s && sudo iptables --flush INPUT",
-	        TRUSTED_ZONE_RULES, UNTRUSTED_ZONE_RULES);
-
-	return system(buffer) < 0;
-}
-
 int fw_trusted_network_rules_init()
 {
 	char buffer[FW_BUF_SIZE] = {0};
@@ -258,19 +249,19 @@ int fw_untrusted_network_rules_destroy()
 	return system(buffer) < 0;
 }
 
-int fw_add_block_rule_for_untrusted_zone(struct in_addr * ip_prefix, uint32_t netmask, char * iface)
+int fw_add_block_rule_for_untrusted_zone(struct in_addr * ip_prefix, uint32_t netmask)
 {
 	int rc, post_rc;
 	char buffer[FW_BUF_SIZE] = {0};
-	sprintf(buffer, "sudo iptables -A INPUT -i %s -s %s/%u -j %s", iface, inet_ntoa(*ip_prefix), netmask, UNTRUSTED_ZONE_RULES);
+	sprintf(buffer, "sudo iptables -A OUTPUT -d %s/%u -j %s",
+	        inet_ntoa(*ip_prefix), netmask, UNTRUSTED_ZONE_RULES);
 
-	rc = system(buffer) < 0, post_rc;
+	rc = system(buffer) < 0;
 	memset(buffer, 0, sizeof(buffer));	
 
-	sprintf(buffer, "sudo iptables -A %s -j DROP", UNTRUSTED_ZONE_RULES);
+	sprintf(buffer, "sudo iptables -A %s -j REJECT", UNTRUSTED_ZONE_RULES);
 
 	post_rc = system(buffer) < 0;
-	printf("rc = %d, post_rc = %d\n", rc, post_rc);
 	return rc | post_rc;
 }
 
@@ -278,14 +269,23 @@ int fw_add_accept_rule_for_trusted_zone(struct in_addr * ip_prefix, uint32_t net
 {
 	int rc, post_rc;
 	char buffer[FW_BUF_SIZE] = {0};
-	sprintf(buffer, "sudo iptables -A INPUT -i %s -s %s/%u -j %s", iface, inet_ntoa(*ip_prefix), netmask, TRUSTED_ZONE_RULES);
+	sprintf(buffer, "sudo iptables -A INPUT -i %s -s %s/%u -j %s",
+	        iface, inet_ntoa(*ip_prefix), netmask, TRUSTED_ZONE_RULES);
 
-
-	rc = system(buffer) < 0, post_rc;
+	rc = system(buffer) < 0;
 	memset(buffer, 0, sizeof(buffer));	
 
 	sprintf(buffer, "sudo iptables -A %s -j ACCEPT", TRUSTED_ZONE_RULES);
 
 	post_rc = system(buffer) < 0;
 	return rc | post_rc;
+}
+
+int fw_ip_tables_flush()
+{
+	char buffer[FW_BUF_SIZE] = {0};
+	sprintf(buffer, "sudo iptables -F %s && sudo iptables -F %s && sudo iptables -F OUTPUT",
+	        TRUSTED_ZONE_RULES, UNTRUSTED_ZONE_RULES);
+
+	return (system(buffer) < 0 | fw_trusted_network_rules_destroy() | fw_untrusted_network_rules_destroy());
 }

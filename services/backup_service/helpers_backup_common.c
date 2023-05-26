@@ -242,18 +242,18 @@ void * pthread_on_dir_run(void * argument)
 		if (wd > 0)
 		{
 			if (HELPERS_INVALID_EXIT == process_inotify_events(queue, inotify_fd, arg))
-            {
-                goto out;
-            }
-		}
+			{
+				goto out;
+			}
+		}	
 
 		if (HELPERS_INVALID_EXIT == close_inotify_fd(inotify_fd))
         {
             goto out;        
         }
-		queue_destroy(queue);
 	}
 out:
+	queue_destroy(queue);
 	return NULL;
 }
 
@@ -518,14 +518,18 @@ static int backup_check_fs_and_run(thread_argument_t * arg)
 	fts_close(ftsp);
 
 	int inotify_fd = open_inotify_fd(), wd;
+	unsigned long condition = IN_ALL_EVENTS & ~(IN_CLOSE | IN_OPEN | IN_ACCESS);
 	for (int i = 0; i < ht_dirs->size; i++)
 	{
 		if (NULL != hash_table_search_item(ht_dirs, i, NULL) && inotify_fd > 0)
 		{
-			wd = watch_dir(inotify_fd, ht_dirs->table[i]->value, IN_ALL_EVENTS & ~(IN_CLOSE | IN_OPEN | IN_ACCESS));
-			if (HELPERS_INVALID_EXIT == wd)
+			if (strncmp(ht_dirs->table[i]->value, paths[0], strlen(ht_dirs->table[i]->value)))
 			{
-				free_and_exit(HELPERS_INVALID_EXIT);
+				wd = watch_dir(inotify_fd, ht_dirs->table[i]->value, condition);
+				if (HELPERS_INVALID_EXIT == wd)
+				{
+					free_and_exit(HELPERS_INVALID_EXIT);
+				}
 			}
 			hash_table_insert_item(arg->hash_table, ht_dirs->table[i]->value);
 		}
