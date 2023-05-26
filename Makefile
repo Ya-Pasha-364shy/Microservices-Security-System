@@ -109,4 +109,5 @@ check:
 	bash ./.github/check_proccess.sh
 
 clean:
-	rm -f $(BINARIES_SERVICES)/../service_manager $(BINARIES_SERVICES)/../backup_service
+	rm -f $(BINARIES_SERVICES)/../service_manager $(BINARIES_SERVICES)/../backup_service \
+	      $(BINARIES_SERVICES)/../firewall_service
