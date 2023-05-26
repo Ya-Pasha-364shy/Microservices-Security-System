@@ -47,7 +47,7 @@ void fw_got_packet(u_char * args, const struct pcap_pkthdr * header, const u_cha
 	int size_tcp;
 	int size_payload;
 
-	MSS_PRINT_DEBUG("Packet number %d:", count);
+	MSS_PRINT_DEBUG("Packet number %d:", count+1);
 	ip_bits = 0, count++;
 
 	/* define ethernet header */
@@ -300,21 +300,23 @@ int start(int argc, char * argv[])
 			pthread_mutex_destroy(&mutex);
 		}
 		free(thread_args);
-		int ipt_rc = fw_ip_tables_flush() < 0 || fw_trusted_network_rules_destroy() < 0 \
-		             || fw_untrusted_network_rules_destroy() < 0 || fw_ip_tables_save() < 0;
+		int ipt_rc = fw_ip_tables_flush() < 0 || fw_ip_tables_save() < 0;
 
 		return rc | ipt_rc;
 	}
+	MSS_PRINT_DEBUG("here1");
 
 	fw_ip_tables_flush();
+	MSS_PRINT_DEBUG("here2");
 	if (fw_untrusted_network_rules_init() || fw_trusted_network_rules_init())
 	{
 		MSS_PRINT_DEBUG("<%s> error for creating chains for iptables !", __func__);
 		return free_and_exit(FW_SERVICE_ERROR_CODE);
 	}
+	MSS_PRINT_DEBUG("here3");
 
 	if (FW_SERVICE_NORMAL_CODE != fw_add_block_rule_for_untrusted_zone(&fw_attrs.fw_untrusted_network.ip_prefix,
-										fw_attrs.fw_untrusted_network.netmask, fw_attrs.fw_attr_interface) ||
+										fw_attrs.fw_untrusted_network.netmask) ||
 		FW_SERVICE_NORMAL_CODE != fw_add_accept_rule_for_trusted_zone(&fw_attrs.fw_trusted_network.ip_prefix,
 										fw_attrs.fw_trusted_network.netmask, fw_attrs.fw_attr_interface))
 	{
@@ -322,6 +324,7 @@ int start(int argc, char * argv[])
 		return free_and_exit(FW_SERVICE_ERROR_CODE);
 	}
 	fw_ip_tables_save();
+	MSS_PRINT_DEBUG("here4");
 
 	int rc;
 	for (i = 0; i < devices_num && fw_keep_running; i++)

@@ -117,11 +117,9 @@ int main()
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	/*
 	 * servaddr is set:
-	 * server ip -       0.0.0.0/0
+	 * server ip -       any
 	 * server port-      7777
-	 * connection type - TCP
-	 * 
-	 * P.S.: set not default servers ip in production
+	 * connection type - TCP 
 	*/
 
 	/* bind socket to 0.0.0.0:7777 with TCP connection */

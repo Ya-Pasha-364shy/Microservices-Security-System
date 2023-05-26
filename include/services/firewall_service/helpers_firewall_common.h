@@ -4,8 +4,6 @@
 #include <ctype.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-// /home/k1rch/CODE/Microservices-Security-System/include/services/firewall_service/helpers_firewall_common.h
-// /home/k1rch/CODE/Microservices-Security-System/include/helpers/helpers_common.h
 #include "../../helpers/helpers_common.h"
 #include "../../helpers/helpers_parser.h"
 #include "../backup_service/helpers_backup_common.h"
@@ -64,6 +62,6 @@ int fw_add_accept_rule_for_trusted_zone(struct in_addr * ip_prefix, uint32_t net
 
 int fw_untrusted_network_rules_init();
 int fw_untrusted_network_rules_destroy();
-int fw_add_block_rule_for_untrusted_zone(struct in_addr * ip_prefix, uint32_t netmask, char * iface);
+int fw_add_block_rule_for_untrusted_zone(struct in_addr * ip_prefix, uint32_t netmask);
 
 #endif // FW_HELPERS_H

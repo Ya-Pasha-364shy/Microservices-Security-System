@@ -40,7 +40,7 @@ typedef struct {
 void backup_service_err_handler(const char * message, void * data);
 
 void * backup_loop(void * argument);
-void * main_loop(void * argument);
+void * general_loop(void * argument);
 int main(int argc, char * argv[]);
 
 #endif // BACKUP_SERVICE_MAIN_H
