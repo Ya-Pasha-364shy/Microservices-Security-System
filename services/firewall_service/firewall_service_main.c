@@ -304,16 +304,13 @@ int start(int argc, char * argv[])
 
 		return rc | ipt_rc;
 	}
-	MSS_PRINT_DEBUG("here1");
 
 	fw_ip_tables_flush();
-	MSS_PRINT_DEBUG("here2");
 	if (fw_untrusted_network_rules_init() || fw_trusted_network_rules_init())
 	{
 		MSS_PRINT_DEBUG("<%s> error for creating chains for iptables !", __func__);
 		return free_and_exit(FW_SERVICE_ERROR_CODE);
 	}
-	MSS_PRINT_DEBUG("here3");
 
 	if (FW_SERVICE_NORMAL_CODE != fw_add_block_rule_for_untrusted_zone(&fw_attrs.fw_untrusted_network.ip_prefix,
 										fw_attrs.fw_untrusted_network.netmask) ||
@@ -324,7 +321,6 @@ int start(int argc, char * argv[])
 		return free_and_exit(FW_SERVICE_ERROR_CODE);
 	}
 	fw_ip_tables_save();
-	MSS_PRINT_DEBUG("here4");
 
 	int rc;
 	for (i = 0; i < devices_num && fw_keep_running; i++)
