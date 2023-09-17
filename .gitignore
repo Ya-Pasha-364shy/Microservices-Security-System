@@ -1,5 +1,6 @@
 **/.vscode
 **/lib
+**/boost
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
