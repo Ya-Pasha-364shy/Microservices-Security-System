@@ -7,6 +7,9 @@ static char path_to_log[LOGGER_PATH_TO_LOG_LEN] = {0};
 //  * add mnemonics for logs
 //  * add func for getting real time
 
+// на данный момент относится только к модулю backup-service.
+// нужно сделать его обобщённее
+
 void logger_set_path_to_log(char * set)
 {
 	if (NULL == set) return;

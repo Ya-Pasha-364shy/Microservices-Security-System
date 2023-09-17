@@ -31,11 +31,19 @@ enum backup_service_codes
 	BACKUP_SERVICE_UNEXPECTED_CODE,
 };
 
-typedef struct {
+typedef struct
+{
 	int sockfd;
 	int newsockfd;
 	char * line;
 } backup_service_process_args_t;
+
+typedef struct backup_service_attrs_s
+{
+	char path_to_directory[1024];
+	char path_to_backup[1024];
+	char path_to_logging[1024];
+} backup_service_attrs_t;
 
 void backup_service_err_handler(const char * message, void * data);
 
